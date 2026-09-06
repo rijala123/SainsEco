@@ -663,6 +663,109 @@ switch ($action) {
         sendJsonResponse(['success' => true, 'message' => 'Item Sampah berhasil dihapus!']);
         break;
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // FILE UPLOAD ENDPOINT FOR TEACHER LEVEL ILLUSTRATIONS
+    // ─────────────────────────────────────────────────────────────────────────
+    case 'upload_image':
+        if (!isset($_FILES['image_file']) && !isset($_FILES['file'])) {
+            sendJsonResponse(['success' => false, 'message' => 'Tidak ada file gambar yang dipilih!'], 400);
+        }
+        $file = $_FILES['image_file'] ?? $_FILES['file'];
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            sendJsonResponse(['success' => false, 'message' => 'Gagal mengunggah file. Kode error: ' . $file['error']], 400);
+        }
+        $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowedExts)) {
+            sendJsonResponse(['success' => false, 'message' => 'Format file tidak didukung! Gunakan format JPG, PNG, WEBP, atau SVG.'], 400);
+        }
+        $uploadDir = __DIR__ . '/../assets/images/';
+        if (!is_dir($uploadDir)) {
+            @mkdir($uploadDir, 0755, true);
+        }
+        $cleanName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', pathinfo($file['name'], PATHINFO_FILENAME));
+        $newFileName = $cleanName . '_' . time() . '.' . $ext;
+        $targetPath = $uploadDir . $newFileName;
+
+        if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+            sendJsonResponse([
+                'success' => true,
+                'message' => 'Gambar berhasil diunggah ke folder assets/images!',
+                'file_path' => 'assets/images/' . $newFileName
+            ]);
+        } else {
+            sendJsonResponse(['success' => false, 'message' => 'Gagal menyimpan file ke direktori assets/images/.'], 500);
+        }
+        break;
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STUDENT MANAGEMENT ENDPOINTS FOR TEACHER
+    // ─────────────────────────────────────────────────────────────────────────
+    case 'get_students':
+        if (!$db) sendJsonResponse(['success' => false, 'message' => 'DB Connection Failed'], 500);
+        $search = trim($_GET['search'] ?? $_POST['search'] ?? '');
+        if (!empty($search)) {
+            $stmt = $db->prepare("SELECT * FROM access_keys WHERE student_name LIKE :s OR school_class LIKE :s OR key_code LIKE :s ORDER BY id DESC");
+            $stmt->execute([':s' => "%$search%"]);
+        } else {
+            $stmt = $db->query("SELECT * FROM access_keys ORDER BY id DESC");
+        }
+        $students = $stmt->fetchAll();
+        sendJsonResponse(['success' => true, 'data' => $students]);
+        break;
+
+    case 'save_student':
+        if (!$db) sendJsonResponse(['success' => false, 'message' => 'DB Connection Failed'], 500);
+        $id = intval($jsonInput['id'] ?? $_POST['id'] ?? 0);
+        $keyCode = strtoupper(trim($jsonInput['key_code'] ?? $_POST['key_code'] ?? ''));
+        $studentName = trim($jsonInput['student_name'] ?? $_POST['student_name'] ?? '');
+        $schoolClass = trim($jsonInput['school_class'] ?? $_POST['school_class'] ?? 'Kelas 5 Eco');
+
+        if (empty($studentName)) sendJsonResponse(['success' => false, 'message' => 'Nama Siswa wajib diisi!'], 400);
+
+        if (empty($keyCode)) {
+            $randomCode = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 4));
+            $keyCode = "ECO-" . $randomCode;
+        }
+
+        if ($id > 0) {
+            $stmt = $db->prepare("UPDATE access_keys SET key_code = :key, student_name = :name, school_class = :class WHERE id = :id");
+            $stmt->execute([':key' => $keyCode, ':name' => $studentName, ':class' => $schoolClass, ':id' => $id]);
+            sendJsonResponse(['success' => true, 'message' => 'Data Siswa berhasil diperbarui!']);
+        } else {
+            $stmt = $db->prepare("INSERT INTO access_keys (key_code, student_name, school_class) VALUES (:key, :name, :class)");
+            $stmt->execute([':key' => $keyCode, ':name' => $studentName, ':class' => $schoolClass]);
+            sendJsonResponse(['success' => true, 'message' => 'Siswa baru berhasil ditambahkan!']);
+        }
+        break;
+
+    case 'delete_student':
+        if (!$db) sendJsonResponse(['success' => false, 'message' => 'DB Connection Failed'], 500);
+        $id = intval($jsonInput['id'] ?? $_POST['id'] ?? $_GET['id'] ?? 0);
+        $keyCode = trim($jsonInput['key_code'] ?? $_POST['key_code'] ?? $_GET['key_code'] ?? '');
+
+        if ($id > 0) {
+            $stmtKey = $db->prepare("SELECT key_code FROM access_keys WHERE id = :id");
+            $stmtKey->execute([':id' => $id]);
+            $keyCode = $stmtKey->fetchColumn();
+
+            $stmt = $db->prepare("DELETE FROM access_keys WHERE id = :id");
+            $stmt->execute([':id' => $id]);
+        } else if (!empty($keyCode)) {
+            $stmt = $db->prepare("DELETE FROM access_keys WHERE key_code = :key");
+            $stmt->execute([':key' => $keyCode]);
+        } else {
+            sendJsonResponse(['success' => false, 'message' => 'ID / Kunci Akses Siswa tidak valid'], 400);
+        }
+
+        if (!empty($keyCode)) {
+            $db->prepare("DELETE FROM leaderboard WHERE access_key = :key")->execute([':key' => $keyCode]);
+            $db->prepare("DELETE FROM adventure_progress WHERE access_key = :key")->execute([':key' => $keyCode]);
+        }
+
+        sendJsonResponse(['success' => true, 'message' => 'Data Siswa & Skor berhasil dihapus!']);
+        break;
+
     default:
         sendJsonResponse([
             'success'   => true,
@@ -684,9 +787,14 @@ switch ($action) {
                 'POST ?action=save_level_admin',
                 'POST ?action=delete_level_admin',
                 'POST ?action=save_waste_item',
-                'POST ?action=delete_waste_item'
+                'POST ?action=delete_waste_item',
+                'POST ?action=upload_image',
+                'GET  ?action=get_students',
+                'POST ?action=save_student',
+                'POST ?action=delete_student'
             ]
         ]);
         break;
 }
+
 
