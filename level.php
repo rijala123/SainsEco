@@ -182,7 +182,11 @@ document.addEventListener('DOMContentLoaded', () => {
           });
         }
         selectedProb = null; selectedCause = null;
-        if (matchesCount >= pairsDB.length) finishLevel(lvl.level_number, errorsCount);
+        if (matchesCount >= pairsDB.length) {
+          setTimeout(() => {
+            finishLevel(lvl.level_number, errorsCount);
+          }, 600);
+        }
       } else {
         ecoSound.playWrong();
         showToast('Belum cocok! Coba pasangan yang lain.', 'error');
@@ -513,7 +517,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // FINISH LEVEL & SAVE PROGRESS
-  function finishLevel(levelNumber, errorsCount) {
+  function finishLevel(rawLevelNumber, errorsCount) {
+    const curLevel = parseInt(rawLevelNumber) || 1;
+    const nextLevel = curLevel + 1;
+
     let stars = 3;
     if (errorsCount === 1) stars = 2;
     else if (errorsCount >= 2) stars = 1;
@@ -527,8 +534,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('res-score').textContent = finalScore;
 
     const btnNext = document.getElementById('btn-next-level');
-    btnNext.href = `level.php?id=${levelNumber + 1}`;
-    btnNext.innerHTML = `Lanjut Level ${levelNumber + 1} <i class="fas fa-arrow-right"></i>`;
+    btnNext.href = `level.php?id=${nextLevel}`;
+    btnNext.innerHTML = `Lanjut Level ${nextLevel} <i class="fas fa-arrow-right"></i>`;
 
     document.getElementById('modal-level-result').style.display = 'flex';
 
@@ -538,15 +545,17 @@ document.addEventListener('DOMContentLoaded', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         access_key: userKey,
-        level_number: levelNumber,
+        level_number: curLevel,
         score: finalScore,
-        stars: stars
+        stars: stars,
+        stars_earned: stars,
+        high_score: finalScore
       })
     })
     .then(r => r.json())
     .then(res => {
       if (res.success) {
-        showToast(`Skor Level ${levelNumber} (${finalScore} poin) tersimpan!`, 'success');
+        showToast(`Skor Level ${curLevel} (${finalScore} poin) tersimpan & Level ${nextLevel} terbuka!`, 'success');
       }
     })
     .catch(e => console.error(e));

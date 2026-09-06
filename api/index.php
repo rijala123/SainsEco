@@ -319,8 +319,8 @@ switch ($action) {
     case 'save_level_result':
         $accessKey   = trim($jsonInput['access_key']   ?? $_POST['access_key']   ?? 'ECO-GUEST');
         $levelNumber = intval($jsonInput['level_number'] ?? $_POST['level_number'] ?? 1);
-        $stars       = intval($jsonInput['stars_earned'] ?? $_POST['stars_earned'] ?? 1);
-        $score       = intval($jsonInput['score']        ?? $_POST['score']        ?? 100);
+        $stars       = intval($jsonInput['stars_earned'] ?? $jsonInput['stars'] ?? $_POST['stars_earned'] ?? $_POST['stars'] ?? 1);
+        $score       = intval($jsonInput['high_score']   ?? $jsonInput['score'] ?? $_POST['high_score']   ?? $_POST['score'] ?? 100);
 
         if ($db) {
             // 1. Simpan / update adventure_progress
