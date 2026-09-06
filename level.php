@@ -117,13 +117,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 1. MATCHING GAME RENDERER & LOGIC
   function renderMatchingGame(lvl, content) {
+    const pairs = content.pairs || [];
     return `
       ${lvl.illustration ? `<div class="kid-card" style="margin-bottom: 0.75rem; padding: 0.85rem;"><img src="${escapeHtml(lvl.illustration)}" alt="Ilustrasi" style="width: 100%; max-height: 160px; object-fit: cover; border-radius: 14px; margin-bottom: 0.75rem; border: 2px solid #CBD5E1;"><div style="font-size: 0.82rem; font-weight: 700; color: var(--text-dark);"><i class="fas fa-hand-pointer" style="color: #22C55E;"></i> ${escapeHtml(lvl.instructions || 'Klik 1 Masalah (Kiri) & 1 Penyebab (Kanan) yang cocok!')}</div></div>` : ''}
+      
+      <div style="font-weight: 800; font-size: 0.88rem; color: #0369A1; margin-bottom: 0.6rem; text-align: center; background: #E0F2FE; padding: 0.45rem 0.8rem; border-radius: 14px; border: 2px solid #BAE6FD;">
+        🧩 Pasangan Cocok: <span id="match-count-num" style="color: #16A34A; font-size: 1.05rem; font-weight: 900;">0</span> / ${pairs.length} Pasangan
+      </div>
+
       <div id="matching-feedback" class="feedback-box success" style="display: none; font-size: 0.85rem; font-weight: 700;"></div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;" id="matching-grid">
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; padding-bottom: 3rem;" id="matching-grid">
         <div id="col-problems" style="display: flex; flex-direction: column; gap: 0.6rem;"></div>
         <div id="col-causes" style="display: flex; flex-direction: column; gap: 0.6rem;"></div>
       </div>
+
+      <button type="button" class="btn-kid btn-kid-green" id="btn-matching-finish-direct" style="margin-top: 0.85rem; padding: 0.9rem; font-size: 1rem; display: none;">
+        Lanjut Ke Level ${parseInt(lvl.level_number) + 1} <i class="fas fa-arrow-right"></i>
+      </button>
     `;
   }
 
@@ -135,17 +146,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const colProbs = document.getElementById('col-problems');
     const colCauses = document.getElementById('col-causes');
 
+    function resetProblemCardsStyle() {
+      document.querySelectorAll('#col-problems .match-card:not(.matched)').forEach(c => {
+        c.style.cssText = 'padding: 0.75rem 0.5rem; margin: 0; cursor: pointer; text-align: center; font-size: 0.8rem; font-weight: 700; border-color: #38BDF8; background: #FFFFFF; color: #0F172A; box-shadow: 0 4px 0 #CBD5E1;';
+      });
+    }
+
+    function resetCauseCardsStyle() {
+      document.querySelectorAll('#col-causes .match-card:not(.matched)').forEach(c => {
+        c.style.cssText = 'padding: 0.75rem 0.5rem; margin: 0; cursor: pointer; text-align: center; font-size: 0.8rem; font-weight: 700; border-color: #A855F7; background: #FFFFFF; color: #0F172A; box-shadow: 0 4px 0 #CBD5E1;';
+      });
+    }
+
     pairsDB.forEach(item => {
       const card = document.createElement('div');
       card.className = 'kid-card match-card';
-      card.setAttribute('data-id', item.id);
+      card.setAttribute('data-id', String(item.id));
       card.style.cssText = 'padding: 0.75rem 0.5rem; margin: 0; cursor: pointer; text-align: center; font-size: 0.8rem; font-weight: 700; border-color: #38BDF8;';
       card.innerHTML = `<div style="font-size: 0.7rem; color: #0284C7; font-weight: 800; margin-bottom: 0.2rem;">MASALAH</div>${escapeHtml(item.prob)}`;
+      
       card.addEventListener('click', () => {
         if (card.classList.contains('matched')) return;
-        document.querySelectorAll('#col-problems .match-card').forEach(c => c.style.borderColor = '#38BDF8');
-        card.style.borderColor = '#F59E0B';
-        selectedProb = item.id;
+        resetProblemCardsStyle();
+        card.style.cssText = 'padding: 0.75rem 0.5rem; margin: 0; cursor: pointer; text-align: center; font-size: 0.8rem; font-weight: 800; background: #FEF3C7 !important; border: 2.5px solid #F59E0B !important; color: #B45309 !important; box-shadow: 0 4px 0 #F59E0B !important;';
+        selectedProb = String(item.id);
         checkPair();
       });
       colProbs.appendChild(card);
@@ -154,14 +178,15 @@ document.addEventListener('DOMContentLoaded', () => {
     shuffledCauses.forEach(item => {
       const card = document.createElement('div');
       card.className = 'kid-card match-card';
-      card.setAttribute('data-id', item.id);
+      card.setAttribute('data-id', String(item.id));
       card.style.cssText = 'padding: 0.75rem 0.5rem; margin: 0; cursor: pointer; text-align: center; font-size: 0.8rem; font-weight: 700; border-color: #A855F7;';
       card.innerHTML = `<div style="font-size: 0.7rem; color: #7E22CE; font-weight: 800; margin-bottom: 0.2rem;">PENYEBAB</div>${escapeHtml(item.cause)}`;
+      
       card.addEventListener('click', () => {
         if (card.classList.contains('matched')) return;
-        document.querySelectorAll('#col-causes .match-card').forEach(c => c.style.borderColor = '#A855F7');
-        card.style.borderColor = '#F59E0B';
-        selectedCause = item.id;
+        resetCauseCardsStyle();
+        card.style.cssText = 'padding: 0.75rem 0.5rem; margin: 0; cursor: pointer; text-align: center; font-size: 0.8rem; font-weight: 800; background: #FEF3C7 !important; border: 2.5px solid #F59E0B !important; color: #B45309 !important; box-shadow: 0 4px 0 #F59E0B !important;';
+        selectedCause = String(item.id);
         checkPair();
       });
       colCauses.appendChild(card);
@@ -169,20 +194,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function checkPair() {
       if (!selectedProb || !selectedCause) return;
+
+      const pCard = document.querySelector(`#col-problems .match-card[data-id="${selectedProb}"]`);
+      const cCard = document.querySelector(`#col-causes .match-card[data-id="${selectedCause}"]`);
+
       if (selectedProb === selectedCause) {
         ecoSound.playCorrect();
         showToast('Pasangan Cocok! 🎉', 'success');
         matchesCount++;
-        const pCard = document.querySelector(`#col-problems .match-card[data-id="${selectedProb}"]`);
-        const cCard = document.querySelector(`#col-causes .match-card[data-id="${selectedCause}"]`);
+
+        const countNumEl = document.getElementById('match-count-num');
+        if (countNumEl) countNumEl.textContent = matchesCount;
+
         if (pCard && cCard) {
           [pCard, cCard].forEach(c => {
             c.classList.add('matched');
-            c.style.cssText = 'padding: 0.75rem 0.5rem; margin: 0; background: #DCFCE7; border-color: #22C55E; color: #15803D; font-weight: 800; font-size: 0.8rem; opacity: 0.85;';
+            c.style.cssText = 'padding: 0.75rem 0.5rem; margin: 0; background: #DCFCE7 !important; border: 2.5px solid #22C55E !important; color: #15803D !important; font-weight: 800; font-size: 0.8rem; box-shadow: 0 4px 0 #15803D !important;';
           });
         }
         selectedProb = null; selectedCause = null;
+
         if (matchesCount >= pairsDB.length) {
+          const btnDirect = document.getElementById('btn-matching-finish-direct');
+          if (btnDirect) {
+            btnDirect.style.display = 'block';
+            btnDirect.onclick = () => {
+              window.location.href = `level.php?id=${parseInt(lvl.level_number) + 1}`;
+            };
+          }
           setTimeout(() => {
             finishLevel(lvl.level_number, errorsCount);
           }, 600);
@@ -191,11 +230,18 @@ document.addEventListener('DOMContentLoaded', () => {
         ecoSound.playWrong();
         showToast('Belum cocok! Coba pasangan yang lain.', 'error');
         errorsCount++;
+
+        if (pCard && cCard) {
+          [pCard, cCard].forEach(c => {
+            c.style.cssText = 'padding: 0.75rem 0.5rem; margin: 0; background: #FEE2E2 !important; border: 2.5px solid #EF4444 !important; color: #991B1B !important; font-weight: 800; font-size: 0.8rem; box-shadow: 0 4px 0 #B91C1C !important;';
+          });
+        }
+
         selectedProb = null; selectedCause = null;
         setTimeout(() => {
-          document.querySelectorAll('#col-problems .match-card:not(.matched)').forEach(c => c.style.borderColor = '#38BDF8');
-          document.querySelectorAll('#col-causes .match-card:not(.matched)').forEach(c => c.style.borderColor = '#A855F7');
-        }, 500);
+          resetProblemCardsStyle();
+          resetCauseCardsStyle();
+        }, 650);
       }
     }
   }
