@@ -20,7 +20,7 @@ require_once __DIR__ . '/includes/header.php';
   <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;" id="res-subtitle">Hebat! Kamu berhasil menyelesaikan tantangan level ini!</p>
 
   <div style="font-size: 2.2rem; margin-bottom: 0.5rem;" id="res-stars">⭐⭐⭐</div>
-  <div style="font-size: 1.25rem; font-weight: 900; color: #22C55E; margin-bottom: 1.25rem;">Skor: <span id="res-score">0</span></div>
+  <div style="font-size: 1.25rem; font-weight: 900; color: #22C55E; margin-bottom: 1rem;">Skor: <span id="res-score">0</span></div>
 
   <div style="display: flex; gap: 0.5rem; width: 100%;">
     <a href="map.php" class="btn-kid btn-kid-blue" style="flex: 1;">
@@ -29,6 +29,10 @@ require_once __DIR__ . '/includes/header.php';
     <a id="btn-next-level" href="map.php" class="btn-kid btn-kid-green" style="flex: 1;">
       Lanjut Level <i class="fas fa-arrow-right"></i>
     </a>
+  </div>
+
+  <div id="auto-redirect-notice" style="margin-top: 1rem; font-size: 0.85rem; font-weight: 800; color: #0284C7; background: #E0F2FE; border: 2px solid #BAE6FD; padding: 0.5rem 0.9rem; border-radius: 14px; width: 100%;">
+    <i class="fas fa-spinner fa-spin"></i> Otomatis lanjut ke Level <span id="next-lvl-num">2</span> dalam <span id="redirect-countdown">3</span> detik...
   </div>
 </div>
 
@@ -576,12 +580,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ecoSound.playLevelComplete();
 
+    document.getElementById('res-emoji').textContent = stars === 3 ? '🎉🌟👑' : (stars === 2 ? '🎉⭐' : '👍⭐');
+    document.getElementById('res-title').textContent = `Level ${curLevel} Selesai!`;
+    document.getElementById('res-subtitle').textContent = `Hebat! Kamu meraih ${stars} Bintang dengan Skor ${finalScore}!`;
     document.getElementById('res-stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
     document.getElementById('res-score').textContent = finalScore;
 
     const btnNext = document.getElementById('btn-next-level');
-    btnNext.href = `level.php?id=${nextLevel}`;
-    btnNext.innerHTML = `Lanjut Level ${nextLevel} <i class="fas fa-arrow-right"></i>`;
+    const nextNumEl = document.getElementById('next-lvl-num');
+    const noticeEl = document.getElementById('auto-redirect-notice');
+
+    const isFinalLevel = curLevel >= 5;
+    const targetUrl = isFinalLevel ? 'klasemen.php' : `level.php?id=${nextLevel}`;
+
+    if (nextNumEl) nextNumEl.textContent = nextLevel;
+
+    if (isFinalLevel) {
+      btnNext.href = 'klasemen.php';
+      btnNext.className = 'btn-kid btn-kid-yellow';
+      btnNext.style.cssText = 'flex: 1;';
+      btnNext.innerHTML = `<i class="fas fa-trophy"></i> Lihat Klasemen`;
+      if (noticeEl) noticeEl.innerHTML = `<i class="fas fa-trophy"></i> Otomatis membuka Klasemen dalam <span id="redirect-countdown">3</span> detik...`;
+    } else {
+      btnNext.href = `level.php?id=${nextLevel}`;
+      btnNext.className = 'btn-kid btn-kid-green';
+      btnNext.style.cssText = 'flex: 1;';
+      btnNext.innerHTML = `Lanjut Level ${nextLevel} <i class="fas fa-arrow-right"></i>`;
+      if (noticeEl) noticeEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Otomatis lanjut ke Level ${nextLevel} dalam <span id="redirect-countdown">3</span> detik...`;
+    }
 
     document.getElementById('modal-level-result').style.display = 'flex';
 
@@ -605,6 +631,26 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     })
     .catch(e => console.error(e));
+
+    // Auto-redirect Countdown Timer (3 seconds)
+    let secondsLeft = 3;
+    const countdownEl = document.getElementById('redirect-countdown');
+
+    const autoRedirectTimer = setInterval(() => {
+      secondsLeft--;
+      if (countdownEl) countdownEl.textContent = secondsLeft;
+      if (secondsLeft <= 0) {
+        clearInterval(autoRedirectTimer);
+        window.location.href = targetUrl;
+      }
+    }, 1000);
+
+    // Cancel timer if user clicks any navigation link manually
+    document.querySelectorAll('#modal-level-result a').forEach(link => {
+      link.addEventListener('click', () => {
+        clearInterval(autoRedirectTimer);
+      });
+    });
   }
 });
 </script>
