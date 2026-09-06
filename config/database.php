@@ -21,6 +21,7 @@ function getDBConnection() {
                 PDO::ATTR_EMULATE_PREPARES => false,
             ];
             $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+            @$pdo->exec("SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
         } catch (PDOException $e) {
             // Attempt auto-create database if running locally
             try {
@@ -30,6 +31,7 @@ function getDBConnection() {
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 ]);
+                @$pdo->exec("SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
             } catch (Exception $ex) {
                 // Return null if connection fails, API will report friendly error
                 return null;

@@ -148,8 +148,8 @@ switch ($action) {
             LEFT JOIN access_keys ak ON ak.key_code = all_keys.key_code
             LEFT JOIN (
                 SELECT access_key,
-                       student_name,
-                       school_class,
+                       MAX(student_name) AS student_name,
+                       MAX(school_class) AS school_class,
                        MAX(score) AS game_score,
                        MAX(waste_sorted) AS waste_sorted,
                        MAX(max_combo) AS max_combo
