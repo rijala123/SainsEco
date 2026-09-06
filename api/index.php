@@ -97,6 +97,10 @@ switch ($action) {
     // GET LEADERBOARD  — gabungkan skor dari leaderboard (game pilah) +
     //                    adventure_progress (level 1–5) per pemain
     // ─────────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // GET LEADERBOARD  — gabungkan skor dari leaderboard (game pilah) +
+    //                    adventure_progress (level 1–5) per pemain
+    // ─────────────────────────────────────────────────────────────────────────
     case 'get_leaderboard':
         $search = trim($_GET['search'] ?? '');
 
@@ -107,44 +111,66 @@ switch ($action) {
             ]);
         }
 
+        // Auto-register missing keys from leaderboard & adventure_progress into access_keys table
+        $db->exec("
+            INSERT IGNORE INTO access_keys (key_code, student_name, school_class)
+            SELECT DISTINCT access_key, COALESCE(NULLIF(student_name, ''), 'Pahlawan Eco'), COALESCE(NULLIF(school_class, ''), 'Kelas 5 Eco')
+            FROM leaderboard WHERE access_key IS NOT NULL AND access_key != ''
+        ");
+        $db->exec("
+            INSERT IGNORE INTO access_keys (key_code, student_name, school_class)
+            SELECT DISTINCT access_key, 'Pahlawan Eco', 'Kelas 5 Eco'
+            FROM adventure_progress WHERE access_key IS NOT NULL AND access_key != ''
+        ");
+
         // Ambil skor gabungan per access_key:
-        // game_score   = skor terbaik dari game pilah sampah (waste_sorted > 0)
-        // level_score  = total skor dari level adventure
+        // game_score   = skor terbaik dari game pilah sampah
+        // level_score  = total skor dari level adventure 1-5
         // total_score  = gabungan keduanya
         $sql = "
             SELECT
-                ak.key_code,
-                ak.student_name,
-                ak.school_class,
+                all_keys.key_code,
+                COALESCE(NULLIF(ak.student_name, ''), gs.student_name, 'Pahlawan Eco') AS student_name,
+                COALESCE(NULLIF(ak.school_class, ''), gs.school_class, 'Kelas 5 Eco') AS school_class,
                 COALESCE(gs.game_score, 0)  AS game_score,
                 COALESCE(lp.level_score, 0) AS level_score,
                 (COALESCE(gs.game_score, 0) + COALESCE(lp.level_score, 0)) AS total_score,
                 COALESCE(gs.waste_sorted, 0) AS waste_sorted,
                 COALESCE(lp.levels_done, 0)  AS levels_done,
                 COALESCE(gs.max_combo, 0)     AS max_combo
-            FROM access_keys ak
+            FROM (
+                SELECT key_code FROM access_keys
+                UNION
+                SELECT access_key AS key_code FROM leaderboard
+                UNION
+                SELECT access_key AS key_code FROM adventure_progress
+            ) all_keys
+            LEFT JOIN access_keys ak ON ak.key_code = all_keys.key_code
             LEFT JOIN (
                 SELECT access_key,
+                       student_name,
+                       school_class,
                        MAX(score) AS game_score,
                        MAX(waste_sorted) AS waste_sorted,
                        MAX(max_combo) AS max_combo
                 FROM leaderboard
-                WHERE waste_sorted > 0
+                WHERE waste_sorted > 0 OR score > 0
                 GROUP BY access_key
-            ) gs ON gs.access_key = ak.key_code
+            ) gs ON gs.access_key = all_keys.key_code
             LEFT JOIN (
                 SELECT access_key,
-                       SUM(high_score)     AS level_score,
-                       SUM(is_completed)   AS levels_done
+                       SUM(high_score) AS level_score,
+                       COUNT(DISTINCT level_number) AS levels_done
                 FROM adventure_progress
+                WHERE is_completed = 1
                 GROUP BY access_key
-            ) lp ON lp.access_key = ak.key_code
+            ) lp ON lp.access_key = all_keys.key_code
             WHERE (COALESCE(gs.game_score,0) + COALESCE(lp.level_score,0)) > 0
         ";
 
         $params = [];
         if (!empty($search)) {
-            $sql .= " AND (ak.student_name LIKE :search OR ak.school_class LIKE :search OR ak.key_code LIKE :search)";
+            $sql .= " AND (ak.student_name LIKE :search OR ak.school_class LIKE :search OR ak.key_code LIKE :search OR gs.student_name LIKE :search)";
             $params[':search'] = "%$search%";
         }
 
@@ -179,7 +205,7 @@ switch ($action) {
     case 'save_score':
         $accessKey   = trim($jsonInput['access_key']   ?? $_POST['access_key']   ?? 'ECO-GUEST');
         $studentName = trim($jsonInput['student_name'] ?? $_POST['student_name'] ?? 'Pahlawan Eco');
-        $schoolClass = trim($jsonInput['school_class'] ?? $_POST['school_class'] ?? 'Kelas Eco');
+        $schoolClass = trim($jsonInput['school_class'] ?? $_POST['school_class'] ?? 'Kelas 5 Eco');
         $score       = intval($jsonInput['score']       ?? $_POST['score']       ?? 0);
         $wasteSorted = intval($jsonInput['waste_sorted'] ?? $_POST['waste_sorted'] ?? 0);
         $maxCombo    = intval($jsonInput['max_combo']   ?? $_POST['max_combo']   ?? 0);
@@ -191,7 +217,20 @@ switch ($action) {
         else                    { $badge = 'Sahabat Lingkungan 🌱'; }
 
         $userRank = 1;
+        $totalScore = $score;
+
         if ($db) {
+            // Auto-insert/update access_keys record
+            $akStmt = $db->prepare("
+                INSERT INTO access_keys (key_code, student_name, school_class)
+                VALUES (:key, :name, :class)
+                ON DUPLICATE KEY UPDATE
+                    student_name = IF(student_name = '' OR student_name IS NULL OR student_name = 'Pahlawan Eco', VALUES(student_name), student_name),
+                    school_class = IF(school_class = '' OR school_class IS NULL, VALUES(school_class), school_class),
+                    last_active = NOW()
+            ");
+            $akStmt->execute([':key' => $accessKey, ':name' => $studentName, ':class' => $schoolClass]);
+
             // Insert score record
             $stmt = $db->prepare("INSERT INTO leaderboard (student_name, school_class, access_key, score, waste_sorted, max_combo, badge_title)
                                   VALUES (:name, :class, :key, :score, :waste, :combo, :badge)");
@@ -205,29 +244,28 @@ switch ($action) {
                 ':badge' => $badge
             ]);
 
-            // Hitung rank berdasarkan total skor gabungan
-            $rankStmt = $db->prepare("
-                SELECT COUNT(*) + 1 AS rank FROM (
-                    SELECT ak.key_code,
-                        (COALESCE(gs.game_score,0) + COALESCE(lp.level_score,0)) AS total_score
-                    FROM access_keys ak
-                    LEFT JOIN (SELECT access_key, MAX(score) AS game_score FROM leaderboard GROUP BY access_key) gs ON gs.access_key = ak.key_code
-                    LEFT JOIN (SELECT access_key, SUM(high_score) AS level_score FROM adventure_progress GROUP BY access_key) lp ON lp.access_key = ak.key_code
-                ) t WHERE t.total_score > :score
+            // Hitung total skor gabungan (Game Pilah + Levels 1-5)
+            $totStmt = $db->prepare("
+                SELECT (COALESCE(gs.game_score, 0) + COALESCE(lp.level_score, 0)) AS total_score
+                FROM (SELECT MAX(score) AS game_score FROM leaderboard WHERE access_key = :k1) gs,
+                     (SELECT SUM(high_score) AS level_score FROM adventure_progress WHERE access_key = :k2 AND is_completed = 1) lp
             ");
-            $rankStmt->execute([':score' => $score]);
-            $userRank = $rankStmt->fetch()['rank'] ?? 1;
+            $totStmt->execute([':k1' => $accessKey, ':k2' => $accessKey]);
+            $totRow = $totStmt->fetch();
+            if ($totRow && intval($totRow['total_score']) > 0) {
+                $totalScore = intval($totRow['total_score']);
+            }
         }
 
         sendJsonResponse([
             'success' => true,
-            'message' => 'Skor berhasil disimpan di Klasemen!',
+            'message' => 'Skor berhasil disimpan dan digabungkan di Klasemen!',
             'data' => [
-                'score'       => $score,
-                'waste_sorted'=> $wasteSorted,
-                'max_combo'   => $maxCombo,
-                'badge'       => $badge,
-                'rank'        => $userRank
+                'game_score'   => $score,
+                'total_score'  => $totalScore,
+                'waste_sorted' => $wasteSorted,
+                'max_combo'    => $maxCombo,
+                'badge'        => $badge
             ]
         ]);
         break;

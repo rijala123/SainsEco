@@ -344,7 +344,12 @@ class WasteGameEngine {
     .then(data => {
       if (data.success) {
         document.getElementById('end-badge').textContent = data.data.badge;
-        showToast(`Skor disimpan! Peringkat #${data.data.rank} 🏆`, 'success');
+        const totalScore = data.data.total_score || this.score;
+        const endScoreEl = document.getElementById('end-score');
+        if (endScoreEl) {
+          endScoreEl.innerHTML = `${this.score} <span style="font-size:0.75rem; color:#0284C7; font-weight:700;">(Total Klasemen: ${totalScore} pts)</span>`;
+        }
+        showToast(`Skor Pilah (${this.score}) digabung ke Klasemen! Total: ${totalScore} pts 🏆`, 'success');
       }
     })
     .catch(() => {

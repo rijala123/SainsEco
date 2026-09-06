@@ -113,6 +113,14 @@ function loadUserData() {
       console.warn('Failed to parse stored user data');
     }
   }
+
+  // Ensure persistent guest key code if none exists
+  if (!currentUser.key_code) {
+    const randomGuest = 'ECO-GUEST-' + Math.floor(1000 + Math.random() * 9000);
+    currentUser.key_code = randomGuest;
+    localStorage.setItem(ECO_CONFIG.storageKey, JSON.stringify(currentUser));
+  }
+
   updateUserBadgeUI();
 }
 
@@ -127,15 +135,15 @@ function saveUserData(data) {
 function updateUserBadgeUI() {
   const badgeEl = document.getElementById('user-badge-display');
   if (badgeEl) {
-    if (currentUser.key_code) {
+    if (currentUser.key_code && !currentUser.key_code.startsWith('ECO-GUEST-')) {
       badgeEl.innerHTML = `
         <span class="status-dot"></span>
         <span>${escapeHtml(currentUser.student_name)}</span>
       `;
     } else {
       badgeEl.innerHTML = `
-        <span class="status-dot" style="background: #F59E0B; box-shadow: 0 0 8px #F59E0B;"></span>
-        <span>Kunci Akses Belum Diisi</span>
+        <span class="status-dot"></span>
+        <span>${escapeHtml(currentUser.student_name)}</span>
       `;
     }
   }

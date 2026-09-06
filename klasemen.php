@@ -175,9 +175,11 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             </div>
             <div style="text-align:right;flex-shrink:0;">
-              <div style="font-weight:900;font-size:1.1rem;color:#22C55E;">${row.total_score}</div>
-              <div style="font-size:0.62rem;color:var(--text-muted);">Total Skor</div>
-              <div style="font-size:0.62rem;color:#0284C7;">${row.game_score} + ${row.level_score}</div>
+              <div style="font-weight:900;font-size:1.15rem;color:#22C55E;">${row.total_score} <span style="font-size:0.7rem;">pts</span></div>
+              <div style="font-size:0.65rem;color:var(--text-muted);font-weight:800;">TOTAL GABUNGAN</div>
+              <div style="font-size:0.68rem;color:#0284C7;font-weight:700;margin-top:0.1rem;">
+                🎮 ${row.game_score} + 🗺️ ${row.level_score}
+              </div>
             </div>
           </div>
         </div>
