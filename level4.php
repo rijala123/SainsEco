@@ -3,12 +3,12 @@ $pageTitle = "Level 4: Urutan Langkah - Eco Clean Mobile App";
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<!-- Banner Header -->
-<div class="kid-banner" style="background: linear-gradient(135deg, #7C3AED, #6D28D9); box-shadow: 0 8px 0 #5B21B6;">
+<!-- Clean Top Banner Header -->
+<div class="kid-banner" style="background: linear-gradient(135deg, #7C3AED, #6D28D9); box-shadow: 0 6px 0 #5B21B6;">
   <div style="display: flex; align-items: center; justify-content: space-between;">
     <div>
-      <h2>🔢 Level 4: Sequencing Game</h2>
-      <p>Susun langkah penyelesaian secara berurutan!</p>
+      <h2>🔢 Level 4: Urutan Langkah</h2>
+      <p>Susun urutan penanganan sampah yang benar & rapi!</p>
     </div>
     <a href="map.php" class="btn-kid" style="width: auto; padding: 0.4rem 0.8rem; background: rgba(255,255,255,0.25); color: #FFF; font-size: 0.8rem;">
       <i class="fas fa-map"></i> Peta
@@ -16,20 +16,41 @@ require_once __DIR__ . '/includes/header.php';
   </div>
 </div>
 
-<div class="kid-card" style="padding: 0.85rem; margin-bottom: 1rem;">
-  <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-dark);">
-    <i class="fas fa-sort-numeric-down" style="color: #7C3AED;"></i> <strong>Tugas:</strong> Susun urutan langkah **Komposting Sampah Organik** dari Langkah 1 sampai Langkah 4! Gunakan panah ⬆️ ⬇️ untuk menggeser.
+<!-- Question Card with Embedded Illustration Image -->
+<div class="kid-card" style="border-color: #7C3AED;">
+  <img src="assets/images/level4_bg.png" alt="Tempat Sampah Penuh Plastik dan Daun" style="width: 100%; max-height: 160px; object-fit: cover; border-radius: 14px; margin-bottom: 0.75rem; border: 2px solid #CBD5E1;">
+  <div style="font-size: 0.8rem; font-weight: 800; color: #6D28D9; margin-bottom: 0.35rem;">SOAL PENANGANAN SAMPAH:</div>
+  <h3 style="font-size: 1.1rem; color: var(--text-dark); margin-bottom: 0.4rem;">
+    📋 Masalah: Tempat sampah penuh dengan sampah plastik dan daun 🗑️🍂
+  </h3>
+  <p style="font-size: 0.85rem; font-weight: 700; color: #0284C7; margin-bottom: 1rem;">
+    Pilih urutan langkah yang paling tepat!
+  </p>
+
+  <div id="sequence-options-container" style="display: flex; flex-direction: column; gap: 0.65rem;">
+    <button type="button" class="btn-kid seq-option-btn" data-seq="1" style="background: #FFFFFF; border: 3px solid #CBD5E1; color: var(--text-dark); font-size: 0.95rem; text-align: left; padding: 0.9rem 1.1rem; border-radius: 18px; width: 100%; box-shadow: 0 4px 0 #CBD5E1;">
+      <span class="seq-badge" style="display: inline-block; width: 28px; height: 28px; background: #F1F5F9; color: var(--text-dark); border-radius: 50%; text-align: center; line-height: 28px; font-weight: 800; margin-right: 0.4rem;">A</span>
+      Pilah → Buang → Kumpulkan
+    </button>
+
+    <button type="button" class="btn-kid seq-option-btn" data-seq="2" style="background: #FFFFFF; border: 3px solid #CBD5E1; color: var(--text-dark); font-size: 0.95rem; text-align: left; padding: 0.9rem 1.1rem; border-radius: 18px; width: 100%; box-shadow: 0 4px 0 #CBD5E1;">
+      <span class="seq-badge" style="display: inline-block; width: 28px; height: 28px; background: #F1F5F9; color: var(--text-dark); border-radius: 50%; text-align: center; line-height: 28px; font-weight: 800; margin-right: 0.4rem;">B</span>
+      Kumpulkan → Pilah → Buang
+    </button>
+
+    <button type="button" class="btn-kid seq-option-btn" data-seq="3" style="background: #FFFFFF; border: 3px solid #CBD5E1; color: var(--text-dark); font-size: 0.95rem; text-align: left; padding: 0.9rem 1.1rem; border-radius: 18px; width: 100%; box-shadow: 0 4px 0 #CBD5E1;">
+      <span class="seq-badge" style="display: inline-block; width: 28px; height: 28px; background: #F1F5F9; color: var(--text-dark); border-radius: 50%; text-align: center; line-height: 28px; font-weight: 800; margin-right: 0.4rem;">C</span>
+      Kumpulkan → Buang → Pilah
+    </button>
   </div>
-</div>
 
-<!-- Scrambled Steps Container List -->
-<div id="sequence-list" style="display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.25rem;">
-  <!-- Rendered via JS -->
-</div>
+  <!-- Dynamic Feedback Box -->
+  <div id="level4-feedback" class="feedback-box" style="display: none; margin-top: 1rem;"></div>
 
-<button class="btn-kid btn-kid-green" id="btn-check-sequence" style="font-size: 1.05rem;">
-  <i class="fas fa-check-circle"></i> Cek Urutan Langkah!
-</button>
+  <button type="button" class="btn-kid btn-kid-green" id="btn-next-level5" style="margin-top: 1rem; display: none;">
+    Lanjut ke Level 5 <i class="fas fa-arrow-right"></i>
+  </button>
+</div>
 
 <!-- Modal Level Result -->
 <div id="modal-level-result" class="game-overlay-start" style="position: absolute; inset: 0; background: rgba(255, 255, 255, 0.96); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; text-align: center;">
@@ -52,98 +73,81 @@ require_once __DIR__ . '/includes/header.php';
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const stepsDB = [
-    { order: 1, title: '🗑️ Pisahkan sampah organik (kulit buah/daun) dari sampah anorganik' },
-    { order: 2, title: '✂️ Cacah sisa sampah organik menjadi potongan kecil' },
-    { order: 3, title: '🪴 Masukkan ke wadah komposter bersama tanah & mikroorganisme' },
-    { order: 4, title: '🌱 Gunakan pupuk kompos matang untuk menutrisi tanaman kebun' }
-  ];
+  let errorsCount = 0;
+  const buttons = document.querySelectorAll('.seq-option-btn');
+  const feedbackEl = document.getElementById('level4-feedback');
+  const btnNext = document.getElementById('btn-next-level5');
 
-  // Scramble initial steps
-  let currentList = [...stepsDB].sort(() => Math.random() - 0.5);
-  let attempts = 0;
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const seqVal = btn.getAttribute('data-seq');
 
-  function renderSequence() {
-    const container = document.getElementById('sequence-list');
-    container.innerHTML = '';
+      // Reset all buttons style & badges to default
+      buttons.forEach(b => {
+        b.style.cssText = 'background: #FFFFFF !important; border: 3px solid #CBD5E1 !important; color: #0F172A !important; font-size: 0.95rem; text-align: left; padding: 0.9rem 1.1rem; border-radius: 18px; width: 100%; box-shadow: 0 4px 0 #CBD5E1 !important;';
+        const badge = b.querySelector('.seq-badge');
+        if (badge) {
+          badge.style.cssText = 'display: inline-block; width: 28px; height: 28px; background: #F1F5F9 !important; color: #0F172A !important; border-radius: 50%; text-align: center; line-height: 28px; font-weight: 800; margin-right: 0.4rem;';
+        }
+      });
 
-    currentList.forEach((item, index) => {
-      const card = document.createElement('div');
-      card.className = 'kid-card';
-      card.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0.85rem; margin: 0; border-color: #7C3AED;';
+      if (seqVal === '2') {
+        // Correct Choice: Kumpulkan → Pilah → Buang
+        ecoSound.playCorrect();
+        showToast('Benar! Urutan langkah 100% tepat!', 'success');
 
-      card.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.85rem; font-weight: 700;">
-          <div style="width: 26px; height: 26px; background: #DDD6FE; color: #6D28D9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 900;">
-            ${index + 1}
+        btn.style.cssText = 'background: linear-gradient(135deg, #22C55E, #16A34A) !important; border: 3px solid #15803D !important; color: #FFFFFF !important; font-size: 0.95rem; text-align: left; padding: 0.9rem 1.1rem; border-radius: 18px; width: 100%; box-shadow: 0 5px 0 #14532D !important;';
+        const badge = btn.querySelector('.seq-badge');
+        if (badge) {
+          badge.style.cssText = 'display: inline-block; width: 28px; height: 28px; background: #FDE047 !important; color: #15803D !important; border-radius: 50%; text-align: center; line-height: 28px; font-weight: 800; margin-right: 0.4rem;';
+        }
+
+        feedbackEl.className = 'feedback-box success';
+        feedbackEl.style.display = 'block';
+        feedbackEl.innerHTML = `
+          <div style="font-size: 1.05rem; font-weight: 800; margin-bottom: 0.35rem;">🎉 ✨ Benar!</div>
+          <div style="font-size: 0.88rem; line-height: 1.5;">
+            Kumpulkan semua, pilah sesuai jenisnya, baru buang dengan benar. Lingkungan jadi rapi! 🌱
           </div>
-          <div>${escapeHtml(item.title)}</div>
-        </div>
-        <div style="display: flex; gap: 0.3rem;">
-          ${index > 0 ? `<button class="btn-move-up" data-idx="${index}" style="background: #F1F5F9; border: 1px solid #CBD5E1; border-radius: 8px; padding: 0.3rem 0.5rem; cursor: pointer;">⬆️</button>` : ''}
-          ${index < currentList.length - 1 ? `<button class="btn-move-down" data-idx="${index}" style="background: #F1F5F9; border: 1px solid #CBD5E1; border-radius: 8px; padding: 0.3rem 0.5rem; cursor: pointer;">⬇️</button>` : ''}
-        </div>
-      `;
+        `;
 
-      container.appendChild(card);
-    });
+        btnNext.style.display = 'inline-flex';
+      } else {
+        // Wrong Choice
+        ecoSound.playWrong();
+        errorsCount++;
+        showToast('Urutan belum tepat! Coba lagi.', 'warning');
 
-    // Move Up/Down Click handlers
-    container.querySelectorAll('.btn-move-up').forEach(b => {
-      b.addEventListener('click', () => {
-        const idx = parseInt(b.getAttribute('data-idx'));
-        swapElements(idx, idx - 1);
-      });
-    });
+        btn.style.cssText = 'background: #FEE2E2 !important; border: 3px solid #EF4444 !important; color: #7F1D1D !important; font-size: 0.95rem; text-align: left; padding: 0.9rem 1.1rem; border-radius: 18px; width: 100%; box-shadow: 0 4px 0 #991B1B !important;';
 
-    container.querySelectorAll('.btn-move-down').forEach(b => {
-      b.addEventListener('click', () => {
-        const idx = parseInt(b.getAttribute('data-idx'));
-        swapElements(idx, idx + 1);
-      });
-    });
-  }
-
-  function swapElements(idx1, idx2) {
-    const temp = currentList[idx1];
-    currentList[idx1] = currentList[idx2];
-    currentList[idx2] = temp;
-    renderSequence();
-  }
-
-  document.getElementById('btn-check-sequence').addEventListener('click', () => {
-    attempts++;
-    let isCorrect = true;
-
-    for (let i = 0; i < currentList.length; i++) {
-      if (currentList[i].order !== i + 1) {
-        isCorrect = false;
-        break;
+        feedbackEl.className = 'feedback-box warning';
+        feedbackEl.style.display = 'block';
+        feedbackEl.innerHTML = `
+          <div style="font-size: 0.95rem; font-weight: 800; margin-bottom: 0.2rem;">⚠️ Urutan Belum Pas!</div>
+          <div style="font-size: 0.82rem; line-height: 1.4;">
+            Pikirkan alurnya: Kita harus mengumpulkan semua sampah dulu, memilah plastik & daun, baru membuangnya dengan benar.
+          </div>
+        `;
       }
-    }
+    });
+  });
 
-    if (isCorrect) {
-      ecoSound.playCorrect();
-      showToast('Urutan Langkah 100% Benar!', 'success');
-      finishLevel();
-    } else {
-      ecoSound.playWrong();
-      showToast('Urutan belum pas. Periksa kembali langkah awal ke akhir!', 'warning');
-    }
+  btnNext.addEventListener('click', () => {
+    finishLevel();
   });
 
   function finishLevel() {
     ecoSound.playLevelUp();
 
     let stars = 3;
-    if (attempts >= 4) stars = 1;
-    else if (attempts >= 2) stars = 2;
+    if (errorsCount >= 3) stars = 1;
+    else if (errorsCount >= 1) stars = 2;
 
     let starStr = '';
     for (let s = 1; s <= 3; s++) starStr += (s <= stars) ? '⭐' : '☆';
     document.getElementById('res-stars').textContent = starStr;
 
-    const finalScore = 600 - (attempts * 40);
+    const finalScore = Math.max(100, 600 - (errorsCount * 40));
     document.getElementById('res-score').textContent = finalScore;
 
     fetch('api/index.php?action=save_level_result', {
@@ -159,8 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('modal-level-result').style.display = 'flex';
   }
-
-  renderSequence();
 });
 </script>
 

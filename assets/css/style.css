@@ -444,3 +444,149 @@ html, body {
   font-size: 0.85rem;
   font-weight: 700;
 }
+
+/* Custom Level Background & Hero Elements */
+.level-hero-card {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 1rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border: 3px solid #CBD5E1;
+}
+
+.level-hero-img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+}
+
+.level-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.2) 0%, rgba(15, 23, 42, 0.75) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1rem;
+  color: #FFFFFF;
+}
+
+.level-hero-title {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #FFFFFF;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  margin-bottom: 0.2rem;
+}
+
+.level-hero-sub {
+  font-size: 0.82rem;
+  color: #F1F5F9;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* Animated Feedback Callouts */
+.feedback-box {
+  border-radius: 18px;
+  padding: 1rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.feedback-box.success {
+  background: #DCFCE7;
+  border: 3px solid #22C55E;
+  color: #14532D;
+}
+
+.feedback-box.warning {
+  background: #FEF3C7;
+  border: 3px solid #F59E0B;
+  color: #78350F;
+}
+
+.feedback-box.danger {
+  background: #FEE2E2;
+  border: 3px solid #EF4444;
+  color: #7F1D1D;
+}
+
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.9) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Checkbox option card styling for Level 2 */
+.checkbox-option-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.1rem;
+  background: #FFFFFF;
+  border: 3px solid #CBD5E1;
+  border-radius: 18px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  user-select: none;
+  font-family: var(--font-primary);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0F172A;
+  box-shadow: 0 4px 0 #CBD5E1;
+  width: 100%;
+  text-align: left;
+  outline: none;
+}
+
+.checkbox-option-card:hover {
+  border-color: #38BDF8;
+  background: #F0F9FF;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #0284C7;
+}
+
+.checkbox-option-card:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #94A3B8;
+}
+
+.checkbox-option-card.selected {
+  border-color: #15803D !important;
+  background: linear-gradient(135deg, #22C55E, #16A34A) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 5px 0 #14532D, 0 8px 18px rgba(34, 197, 94, 0.3) !important;
+  transform: translateY(-2px);
+}
+
+.checkbox-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  border: 2.5px solid #94A3B8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F1F5F9;
+  color: #94A3B8;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.checkbox-option-card.selected .checkbox-icon {
+  background: #FDE047 !important;
+  border-color: #FFFFFF !important;
+  color: #15803D !important;
+  box-shadow: 0 2px 0 #B45309;
+}
+
+.checkbox-option-card.selected .checkbox-icon i {
+  display: inline-block !important;
+  color: #15803D !important;
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+

@@ -30,9 +30,9 @@ require_once __DIR__ . '/includes/header.php';
   <div class="level-node-item" id="node-level-5" style="position: relative; z-index: 5; margin-bottom: 2rem; display: flex; justify-content: center;">
     <a href="level5.php" class="level-btn locked" data-level="5">
       <div class="level-badge">LEVEL 5</div>
-      <div class="level-icon">🌟</div>
+      <div class="level-icon">🌱</div>
       <div class="level-title">Tindakan Nyata</div>
-      <div class="level-subtitle">Decision Game</div>
+      <div class="level-subtitle">Pahlawan Bumi</div>
       <div class="level-stars" id="stars-level-5">☆☆☆</div>
     </a>
   </div>
@@ -41,9 +41,9 @@ require_once __DIR__ . '/includes/header.php';
   <div class="level-node-item" id="node-level-4" style="position: relative; z-index: 5; margin-bottom: 2rem; display: flex; justify-content: flex-end; padding-right: 1.5rem;">
     <a href="level4.php" class="level-btn locked" data-level="4">
       <div class="level-badge">LEVEL 4</div>
-      <div class="level-icon">🔢</div>
+      <div class="level-icon">📋</div>
       <div class="level-title">Urutan Langkah</div>
-      <div class="level-subtitle">Sequencing Game</div>
+      <div class="level-subtitle">Pilah & Buang</div>
       <div class="level-stars" id="stars-level-4">☆☆☆</div>
     </a>
   </div>
@@ -53,8 +53,8 @@ require_once __DIR__ . '/includes/header.php';
     <a href="level3.php" class="level-btn locked" data-level="3">
       <div class="level-badge">LEVEL 3</div>
       <div class="level-icon">🔍</div>
-      <div class="level-title">Fokus Inti</div>
-      <div class="level-subtitle">Filter Solusi</div>
+      <div class="level-title">Solusi Sampah</div>
+      <div class="level-subtitle">Sampah Sekolah</div>
       <div class="level-stars" id="stars-level-3">☆☆☆</div>
     </a>
   </div>
@@ -63,9 +63,9 @@ require_once __DIR__ . '/includes/header.php';
   <div class="level-node-item" id="node-level-2" style="position: relative; z-index: 5; margin-bottom: 2rem; display: flex; justify-content: flex-end; padding-right: 1.5rem;">
     <a href="level2.php" class="level-btn locked" data-level="2">
       <div class="level-badge">LEVEL 2</div>
-      <div class="level-icon">🗂️</div>
-      <div class="level-title">Memecahkan Masalah</div>
-      <div class="level-subtitle">Grouping Game</div>
+      <div class="level-icon">🌊</div>
+      <div class="level-title">Banjir & Sekolah</div>
+      <div class="level-subtitle">Penyebab Masalah</div>
       <div class="level-stars" id="stars-level-2">☆☆☆</div>
     </a>
   </div>
@@ -74,9 +74,9 @@ require_once __DIR__ . '/includes/header.php';
   <div class="level-node-item" id="node-level-1" style="position: relative; z-index: 5; display: flex; justify-content: center;">
     <a href="level1.php" class="level-btn active-unlocked" data-level="1">
       <div class="level-badge">LEVEL 1</div>
-      <div class="level-icon">🧩</div>
-      <div class="level-title">Pengenalan Pola</div>
-      <div class="level-subtitle">Matching Game</div>
+      <div class="level-icon">🏞️</div>
+      <div class="level-title">Sungai Tercemar</div>
+      <div class="level-subtitle">Pengenalan Pola</div>
       <div class="level-stars" id="stars-level-1">☆☆☆</div>
     </a>
   </div>

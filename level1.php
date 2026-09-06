@@ -3,7 +3,7 @@ $pageTitle = "Level 1: Pengenalan Pola - Eco Clean Mobile App";
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<!-- Banner Header -->
+<!-- Clean Top Banner Header -->
 <div class="kid-banner" style="background: linear-gradient(135deg, #22C55E, #16A34A);">
   <div style="display: flex; align-items: center; justify-content: space-between;">
     <div>
@@ -16,10 +16,17 @@ require_once __DIR__ . '/includes/header.php';
   </div>
 </div>
 
-<div class="kid-card" style="margin-bottom: 1rem; padding: 0.85rem;">
+<!-- Question Card with Embedded Illustration Image -->
+<div class="kid-card" style="margin-bottom: 0.75rem; padding: 0.85rem;">
+  <img src="assets/images/level1_bg.png" alt="Sungai Tercemar" style="width: 100%; max-height: 160px; object-fit: cover; border-radius: 14px; margin-bottom: 0.75rem; border: 2px solid #CBD5E1;">
   <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-dark);">
-    <i class="fas fa-hand-pointer" style="color: #22C55E;"></i> <strong>Cara Bermain:</strong> Klik 1 Masalah Lingkungan (Kiri), lalu klik Penyebab yang cocok (Kanan)!
+    <i class="fas fa-hand-pointer" style="color: #22C55E;"></i> <strong>Tugas:</strong> Perhatikan gambar pencemaran sungai di atas, lalu klik 1 Masalah (Kiri) & Penyebab yang cocok (Kanan)!
   </div>
+</div>
+
+<!-- Dynamic Feedback Callout Box for Level 1 -->
+<div id="level1-feedback" class="feedback-box success" style="display: none; font-size: 0.85rem; font-weight: 700;">
+  <!-- Rendered via JS -->
 </div>
 
 <!-- Matching Container Grid -->
@@ -109,11 +116,19 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function checkPair() {
+    const feedbackBox = document.getElementById('level1-feedback');
+
     if (selectedProb && selectedCause) {
       if (selectedProb === selectedCause) {
         // Correct match!
         ecoSound.playCorrect();
         showToast('Cocok! Pola Masalah & Penyebab Tepat!', 'success');
+
+        if (feedbackBox) {
+          feedbackBox.className = 'feedback-box success';
+          feedbackBox.style.display = 'block';
+          feedbackBox.innerHTML = `🎉 <strong>Sempurna!</strong> Kamu berhasil mengenali pola pasangan masalah lingkungan & penyebabnya!`;
+        }
 
         const probEl = colProbs.querySelector(`[data-id="${selectedProb}"]`);
         const causeEl = colCauses.querySelector(`[data-id="${selectedCause}"]`);
@@ -138,6 +153,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ecoSound.playWrong();
         errorsCount++;
         showToast('Kurang tepat! Coba pasangan yang lain.', 'warning');
+
+        if (feedbackBox) {
+          feedbackBox.className = 'feedback-box warning';
+          feedbackBox.style.display = 'block';
+          feedbackBox.innerHTML = `⚠️ <strong>Kurang tepat!</strong> Pasangan ini belum cocok. Amati kembali penyebab utama dari masalah ini!`;
+        }
         
         selectedProb = null;
         selectedCause = null;

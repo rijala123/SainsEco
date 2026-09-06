@@ -3,12 +3,12 @@ $pageTitle = "Level 5: Tindakan Nyata - Eco Clean Mobile App";
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<!-- Banner Header -->
-<div class="kid-banner" style="background: linear-gradient(135deg, #EC4899, #DB2777); box-shadow: 0 8px 0 #9D174D;">
+<!-- Clean Top Banner Header -->
+<div class="kid-banner" style="background: linear-gradient(135deg, #EC4899, #DB2777); box-shadow: 0 6px 0 #9D174D;">
   <div style="display: flex; align-items: center; justify-content: space-between;">
     <div>
       <h2>🌟 Level 5: Decision Game</h2>
-      <p>Simulasi tindakan nyata penyelamat bumi!</p>
+      <p>Simulasi tindakan nyata pahlawan penyelamat bumi!</p>
     </div>
     <a href="map.php" class="btn-kid" style="width: auto; padding: 0.4rem 0.8rem; background: rgba(255,255,255,0.25); color: #FFF; font-size: 0.8rem;">
       <i class="fas fa-map"></i> Peta
@@ -16,19 +16,22 @@ require_once __DIR__ . '/includes/header.php';
   </div>
 </div>
 
-<!-- Scenario Decision Box -->
-<div class="kid-card" id="decision-card">
+<!-- Scenario Decision Box with Embedded Illustration Image -->
+<div class="kid-card" id="decision-card" style="border-color: #EC4899;">
+  <img src="assets/images/level5_bg.png" alt="Tindakan Nyata Penyelamat Bumi" style="width: 100%; max-height: 160px; object-fit: cover; border-radius: 14px; margin-bottom: 0.75rem; border: 2px solid #CBD5E1;">
   <div style="font-size: 0.72rem; font-weight: 800; color: #DB2777; margin-bottom: 0.3rem;" id="decision-step">SKENARIO 1 DARI 3</div>
   <h3 style="font-size: 1.1rem; color: var(--text-dark); margin-bottom: 0.5rem;" id="decision-title">Memuat...</h3>
   <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;" id="decision-desc">Memuat...</p>
 
   <div style="font-weight: 800; font-size: 0.85rem; color: #15803D; margin-bottom: 0.6rem;">
-    🌱 Pilih Tindakan Nyata Yang Paling Pikirkan Bumi:
+    🌱 Pilih Tindakan Nyata Yang Paling Berdampak Positif Bagi Bumi:
   </div>
 
   <div id="choices-container" style="display: flex; flex-direction: column; gap: 0.6rem;">
     <!-- Rendered via JS -->
   </div>
+
+  <div id="level5-feedback" class="feedback-box" style="display: none; margin-top: 0.85rem;"></div>
 </div>
 
 <!-- Modal Level Result -->
@@ -57,24 +60,24 @@ document.addEventListener('DOMContentLoaded', () => {
       title: '🛒 Skenario 1: Belanja di Minimarket / Pasar',
       desc: 'Saat kamu diajak berbelanja keperluan sekolah, kasir menawarkan kantong plastik sekali pakai. Apa tindakan nyatamu?',
       choices: [
-        { text: '👜 Mengeluarkan kantong kain ramah lingkungan sendiri dari tas', points: 200, isBest: true, msg: 'Hebat! Kamu menghemat 1 sampah plastik dari laut!' },
-        { text: '🛍️ Menerima 3 kantong plastik sekali pakai gratis', points: -50, isBest: false, msg: 'Kantong plastik butuh 500 tahun terurai di alam.' }
+        { text: '👜 Mengeluarkan kantong kain ramah lingkungan sendiri dari tas', points: 200, isBest: true, msg: '🎉 Sempurna! Kamu menghemat 1 sampah plastik dari laut dan melindungi hewan laut!' },
+        { text: '🛍️ Menerima 3 kantong plastik sekali pakai gratis', points: -50, isBest: false, msg: '⚠️ Kurang tepat! Kantong plastik sekali pakai butuh 500 tahun untuk hancur di alam.' }
       ]
     },
     {
       title: '🏫 Skenario 2: Minum Saat Jam Istirahat Sekolah',
       desc: 'Kamu merasa haus setelah berolahraga di lapangan sekolah. Tindakan paling tepat yang kamu lakukan adalah...',
       choices: [
-        { text: '🧴 Minum dari Tumbler botol minum isi ulang sendiri', points: 200, isBest: true, msg: 'Pilihan bijak! Kamu menghemat uang jajan & mengurangi sampah botol.' },
-        { text: '🥤 Membeli 2 botol air kemasan plastik sekali pakai', points: -50, isBest: false, msg: 'Botol plastik bekas menumpuk di tempat sampah sekolah.' }
+        { text: '🧴 Minum dari Tumbler botol minum isi ulang sendiri', points: 200, isBest: true, msg: '🎉 Pilihan sangat bijak! Kamu menghemat uang jajan & mengurangi tumpukan sampah botol plastik!' },
+        { text: '🥤 Membeli 2 botol air kemasan plastik sekali pakai', points: -50, isBest: false, msg: '⚠️ Kurang tepat! Botol plastik bekas minuman akan menumpuk di tempat sampah sekolah.' }
       ]
     },
     {
       title: '🍂 Skenario 3: Memeriksakan Sampah Daun di Halaman',
       desc: 'Halaman sekolah penuh dengan guguran daun kering. Apa tindakan nyata terbaik?',
       choices: [
-        { text: '🌱 Kumpulkan daun dan masukkan ke komposter untuk dijadikan pupuk', points: 200, isBest: true, msg: 'Luar biasa! Pupuk kompos menutrisi kebun sekolah!' },
-        { text: '💨 Membakar tumpukan daun hingga berasap tebal', points: -100, isBest: false, msg: 'Asap pembakaran daun mencemari udara & mengganggu pernapasan.' }
+        { text: '🌱 Kumpulkan daun dan masukkan ke komposter untuk dijadikan pupuk', points: 200, isBest: true, msg: '🎉 Luar biasa! Pupuk kompos hasil olahan daun menutrisi kebun sekolah jadi subur!' },
+        { text: '💨 Membakar tumpukan daun hingga berasap tebal', points: -100, isBest: false, msg: '⚠️ Salah! Asap pembakaran daun mencemari udara & mengganggu pernapasan warga sekolah.' }
       ]
     }
   ];
@@ -95,12 +98,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('decision-desc').textContent = dec.desc;
 
     const choicesContainer = document.getElementById('choices-container');
+    const feedbackBox = document.getElementById('level5-feedback');
+    feedbackBox.style.display = 'none';
     choicesContainer.innerHTML = '';
 
     dec.choices.forEach(ch => {
       const btn = document.createElement('button');
       btn.className = 'btn-kid';
-      btn.style.cssText = 'background: #FFFFFF; border: 2px solid #CBD5E1; color: var(--text-dark); font-size: 0.85rem; text-align: left; padding: 0.85rem 1rem; border-radius: 16px; width: 100%;';
+      btn.style.cssText = 'background: #FFFFFF; border: 3px solid #CBD5E1; color: var(--text-dark); font-size: 0.85rem; text-align: left; padding: 0.85rem 1rem; border-radius: 16px; width: 100%;';
       btn.innerHTML = `${escapeHtml(ch.text)}`;
 
       btn.addEventListener('click', () => {
@@ -109,13 +114,23 @@ document.addEventListener('DOMContentLoaded', () => {
           bestChoicesCount++;
           ecoSound.playCorrect();
           showToast(ch.msg, 'success');
+          
+          feedbackBox.className = 'feedback-box success';
+          feedbackBox.style.display = 'block';
+          feedbackBox.innerHTML = ch.msg;
         } else {
           ecoSound.playWrong();
           showToast(ch.msg, 'warning');
+
+          feedbackBox.className = 'feedback-box warning';
+          feedbackBox.style.display = 'block';
+          feedbackBox.innerHTML = ch.msg;
         }
 
-        currentIndex++;
-        renderDecision();
+        setTimeout(() => {
+          currentIndex++;
+          renderDecision();
+        }, 1800);
       });
 
       choicesContainer.appendChild(btn);
