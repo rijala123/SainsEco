@@ -65,6 +65,9 @@ class WasteGameEngine {
       { name: 'Bahan Bakar Sisa', category: 'b3',       icon: '⛽', fact: 'Sisa bensin & oli adalah limbah B3 berbahaya tinggi.' }
     ];
 
+    // Fetch dynamic waste items from DB
+    this.fetchDynamicItems();
+
     // Shuffle queue untuk anti-pengulangan
     this.shuffleQueue = [];
     this.playedItems = new Set();
@@ -81,6 +84,23 @@ class WasteGameEngine {
     this.activeItemData = null;
 
     this.bindEvents();
+  }
+
+  fetchDynamicItems() {
+    fetch('api/index.php?action=get_waste_items')
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          this.itemsDB = res.data.map(item => ({
+            name: item.name,
+            category: item.category,
+            icon: item.icon || '🗑️',
+            points: item.points || 10,
+            fact: item.fact || ''
+          }));
+        }
+      })
+      .catch(err => console.log('Using offline waste items DB fallback'));
   }
 
   // ── Anti-repeat shuffle queue ──────────────────────────────────────────────

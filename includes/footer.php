@@ -9,8 +9,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
       <?php if (!isset($hideNav) || !$hideNav): ?>
       <!-- Mobile App Bottom Navigation Bar -->
-      <nav class="mobile-bottom-nav" style="grid-template-columns: repeat(4, 1fr);">
-        <a href="map.php" class="nav-item-btn <?= ($currentPage === 'map.php' || $currentPage === '') ? 'active' : '' ?>">
+      <nav class="mobile-bottom-nav" style="grid-template-columns: repeat(5, 1fr);">
+        <a href="map.php" class="nav-item-btn <?= ($currentPage === 'map.php' || $currentPage === '' || $currentPage === 'level.php') ? 'active' : '' ?>">
           <i class="fas fa-map-marked-alt"></i>
           <span>Peta</span>
         </a>
@@ -28,6 +28,11 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <a href="edukasi.php" class="nav-item-btn <?= $currentPage === 'edukasi.php' ? 'active' : '' ?>">
           <i class="fas fa-book-open"></i>
           <span>Belajar</span>
+        </a>
+
+        <a href="guru.php" class="nav-item-btn <?= $currentPage === 'guru.php' ? 'active' : '' ?>">
+          <i class="fas fa-user-tie"></i>
+          <span>Guru</span>
         </a>
       </nav>
       <?php endif; ?>

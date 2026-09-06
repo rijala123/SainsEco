@@ -8,7 +8,7 @@ require_once __DIR__ . '/includes/header.php';
   <div style="display: flex; align-items: center; justify-content: space-between;">
     <div>
       <h2>🗺️ Peta Petualangan Eco</h2>
-      <p>Selesaikan 5 level sains lingkungan!</p>
+      <p id="map-subtitle">Selesaikan level sains lingkungan!</p>
     </div>
     <div style="background: rgba(255,255,255,0.25); border: 2px solid #FFF; padding: 0.4rem 0.8rem; border-radius: 20px; text-align: center;">
       <div style="font-size: 0.7rem; font-weight: 800;">TOTAL BINTANG</div>
@@ -17,7 +17,7 @@ require_once __DIR__ . '/includes/header.php';
   </div>
 </div>
 
-<!-- Adventure Map Trail Box -->
+<!-- Adventure Map Trail Container -->
 <div class="map-trail-container" style="position: relative; background: linear-gradient(180deg, #BAE6FD 0%, #DCFCE7 50%, #86EFAC 100%); border: 3px solid #22C55E; border-radius: 24px; padding: 1.5rem 1rem; box-shadow: var(--shadow-cartoon); overflow: hidden; min-height: 480px;">
 
   <!-- Winding Path Line (SVG) -->
@@ -26,59 +26,11 @@ require_once __DIR__ . '/includes/header.php';
     <path d="M 175 420 C 280 380, 280 320, 175 280 C 70 240, 70 180, 175 140 C 280 100, 280 60, 175 40" fill="none" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
   </svg>
 
-  <!-- Level 5 Node (Top) -->
-  <div class="level-node-item" id="node-level-5" style="position: relative; z-index: 5; margin-bottom: 2rem; display: flex; justify-content: center;">
-    <a href="level5.php" class="level-btn locked" data-level="5">
-      <div class="level-badge">LEVEL 5</div>
-      <div class="level-icon">🌱</div>
-      <div class="level-title">Tindakan Nyata</div>
-      <div class="level-subtitle">Pahlawan Bumi</div>
-      <div class="level-stars" id="stars-level-5">☆☆☆</div>
-    </a>
-  </div>
-
-  <!-- Level 4 Node -->
-  <div class="level-node-item" id="node-level-4" style="position: relative; z-index: 5; margin-bottom: 2rem; display: flex; justify-content: flex-end; padding-right: 1.5rem;">
-    <a href="level4.php" class="level-btn locked" data-level="4">
-      <div class="level-badge">LEVEL 4</div>
-      <div class="level-icon">📋</div>
-      <div class="level-title">Urutan Langkah</div>
-      <div class="level-subtitle">Pilah & Buang</div>
-      <div class="level-stars" id="stars-level-4">☆☆☆</div>
-    </a>
-  </div>
-
-  <!-- Level 3 Node -->
-  <div class="level-node-item" id="node-level-3" style="position: relative; z-index: 5; margin-bottom: 2rem; display: flex; justify-content: flex-start; padding-left: 1.5rem;">
-    <a href="level3.php" class="level-btn locked" data-level="3">
-      <div class="level-badge">LEVEL 3</div>
-      <div class="level-icon">🔍</div>
-      <div class="level-title">Solusi Sampah</div>
-      <div class="level-subtitle">Sampah Sekolah</div>
-      <div class="level-stars" id="stars-level-3">☆☆☆</div>
-    </a>
-  </div>
-
-  <!-- Level 2 Node -->
-  <div class="level-node-item" id="node-level-2" style="position: relative; z-index: 5; margin-bottom: 2rem; display: flex; justify-content: flex-end; padding-right: 1.5rem;">
-    <a href="level2.php" class="level-btn locked" data-level="2">
-      <div class="level-badge">LEVEL 2</div>
-      <div class="level-icon">🌊</div>
-      <div class="level-title">Banjir & Sekolah</div>
-      <div class="level-subtitle">Penyebab Masalah</div>
-      <div class="level-stars" id="stars-level-2">☆☆☆</div>
-    </a>
-  </div>
-
-  <!-- Level 1 Node (Bottom Start) -->
-  <div class="level-node-item" id="node-level-1" style="position: relative; z-index: 5; display: flex; justify-content: center;">
-    <a href="level1.php" class="level-btn active-unlocked" data-level="1">
-      <div class="level-badge">LEVEL 1</div>
-      <div class="level-icon">🏞️</div>
-      <div class="level-title">Sungai Tercemar</div>
-      <div class="level-subtitle">Pengenalan Pola</div>
-      <div class="level-stars" id="stars-level-1">☆☆☆</div>
-    </a>
+  <div id="map-nodes-list" style="position: relative; z-index: 5; display: flex; flex-direction: column-reverse; gap: 2rem;">
+    <!-- Rendered dynamically via JS from DB -->
+    <div style="text-align: center; padding: 3rem; color: var(--text-muted); font-weight: 800;">
+      Memuat Peta Petualangan... ⏳
+    </div>
   </div>
 </div>
 
@@ -86,43 +38,77 @@ require_once __DIR__ . '/includes/header.php';
 document.addEventListener('DOMContentLoaded', () => {
   const userKey = currentUser.key_code || 'ECO-GUEST';
 
-  fetch(`api/index.php?action=get_map_progress&access_key=${encodeURIComponent(userKey)}`)
-    .then(res => res.json())
-    .then(res => {
-      if (res.success && res.levels) {
-        let totalStars = 0;
-        res.levels.forEach(lvl => {
-          const btn = document.querySelector(`.level-btn[data-level="${lvl.level_number}"]`);
-          const starsEl = document.getElementById(`stars-level-${lvl.level_number}`);
+  // Load levels & user progress simultaneously
+  Promise.all([
+    fetch('api/index.php?action=get_levels').then(r => r.json()),
+    fetch(`api/index.php?action=get_map_progress&access_key=${encodeURIComponent(userKey)}`).then(r => r.json())
+  ])
+  .then(([levelsRes, progressRes]) => {
+    const levels = levelsRes.data || [];
+    const userProgress = progressRes.levels || [];
+    
+    if (levels.length > 0) {
+      document.getElementById('map-subtitle').textContent = `Selesaikan ${levels.length} level sains lingkungan!`;
+      renderMapNodes(levels, userProgress);
+    } else {
+      document.getElementById('map-nodes-list').innerHTML = `
+        <div class="kid-card" style="text-align: center; margin: 2rem 0;">
+          <div style="font-size: 3rem;">🧩</div>
+          <h3>Belum Ada Level</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Guru belum menambahkan level peta.</p>
+        </div>
+      `;
+    }
+  })
+  .catch(err => console.error(err));
 
-          totalStars += lvl.stars;
+  function renderMapNodes(levels, userProgress) {
+    const container = document.getElementById('map-nodes-list');
+    let totalStars = 0;
+    const progressMap = {};
+    userProgress.forEach(p => { progressMap[p.level_number] = p; });
 
-          // Render Stars
-          let starStr = '';
-          for (let s = 1; s <= 3; s++) {
-            starStr += (s <= lvl.stars) ? '⭐' : '☆';
-          }
-          if (starsEl) starsEl.textContent = starStr;
+    // Alignment layout positions: center, right, left, right, center
+    const alignMap = ['center', 'flex-end', 'flex-start', 'flex-end', 'center'];
 
-          // Update Lock / Unlock state
-          if (btn) {
-            if (lvl.unlocked) {
-              btn.classList.remove('locked');
-              btn.classList.add('active-unlocked');
-            } else {
-              btn.classList.add('locked');
-              btn.classList.remove('active-unlocked');
-              btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                showToast(`Level ${lvl.level_number} masih terkunci! Selesaikan level sebelumnya lebih dulu.`, 'warning');
-              });
-            }
-          }
-        });
+    container.innerHTML = levels.map((lvl, index) => {
+      const p = progressMap[lvl.level_number] || { stars: 0, unlocked: (lvl.level_number === 1) };
+      if (p.unlocked === undefined) p.unlocked = (lvl.level_number === 1);
 
-        document.getElementById('total-stars-count').textContent = `${totalStars} ⭐`;
+      totalStars += (p.stars || 0);
+
+      let starStr = '';
+      for (let s = 1; s <= 3; s++) {
+        starStr += (s <= p.stars) ? '⭐' : '☆';
       }
+
+      const alignPos = alignMap[index % alignMap.length];
+      const paddingSide = alignPos === 'flex-end' ? 'padding-right: 1.5rem;' : (alignPos === 'flex-start' ? 'padding-left: 1.5rem;' : '');
+
+      return `
+        <div class="level-node-item" style="display: flex; justify-content: ${alignPos}; ${paddingSide}">
+          <a href="level.php?id=${lvl.level_number}" class="level-btn ${p.unlocked ? 'active-unlocked' : 'locked'}" data-level="${lvl.level_number}">
+            <div class="level-badge" style="background: ${lvl.bg_color || '#22C55E'};">LEVEL ${lvl.level_number}</div>
+            <div class="level-icon">${lvl.icon || '🧩'}</div>
+            <div class="level-title">${escapeHtml(lvl.title.replace(/^Level \d+:\s*/i, ''))}</div>
+            <div class="level-subtitle">${escapeHtml(lvl.subtitle || '')}</div>
+            <div class="level-stars">${starStr}</div>
+          </a>
+        </div>
+      `;
+    }).join('');
+
+    document.getElementById('total-stars-count').textContent = `${totalStars} ⭐`;
+
+    // Prevent clicking locked buttons
+    container.querySelectorAll('.level-btn.locked').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const num = btn.getAttribute('data-level');
+        showToast(`Level ${num} masih terkunci! Selesaikan level sebelumnya lebih dulu.`, 'warning');
+      });
     });
+  }
 });
 </script>
 
